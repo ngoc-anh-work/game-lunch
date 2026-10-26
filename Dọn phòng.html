@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dọn phòng</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e6f7fc;--ink:#23405a;--card:#fff;--sun:#ffc93c;--mint:#5fd3a6;--wall:#cdeef7;--floor:#f0d3a0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13222d;--ink:#e8f4fa;--card:#1f3544}}
+:root[data-theme="dark"]{--bg:#13222d;--ink:#e8f4fa;--card:#1f3544}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{--w:min(100%,460px,calc((100dvh - 190px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.75));margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Fredoka,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 12px}
+header{width:var(--w);display:flex;align-items:center;justify-content:space-between;gap:8px}
+h1{margin:0;font-size:22px;font-weight:600}
+.tools{display:flex;align-items:center;gap:10px;font-weight:600}
+button{font:inherit;color:inherit;cursor:pointer}
+#mute{border:0;background:var(--card);border-radius:50%;width:38px;height:38px;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.stage{position:relative;width:var(--w);aspect-ratio:3/4;container-type:inline-size;border-radius:18px;overflow:hidden;touch-action:none;box-shadow:0 6px 18px rgba(35,64,90,.25);background:linear-gradient(var(--wall) 0 40%,#e3b36f 40% 41.2%,var(--floor) 41.2%)}
+.stage>div{position:absolute}
+.win{left:62%;top:6%;width:30%;height:22%;background:linear-gradient(#8fd8f5,#d9f3fc);border:1.6cqw solid #fff;border-radius:2cqw;box-sizing:border-box}
+.win::after{content:"";position:absolute;right:15%;top:15%;width:7cqw;height:7cqw;border-radius:50%;background:var(--sun)}
+.sill{left:60%;top:28%;width:34%;height:1.8%;background:#fff;border-radius:1cqw}
+.shelf{left:8%;top:30%;width:28%;height:1.8%;background:#c98f5a;border-radius:1cqw}
+.bed{left:6%;top:46%;width:46%;height:24%;background:linear-gradient(#ff9bb0 0 70%,#b9794a 70%);border-radius:3cqw}
+.bed::before{content:"";position:absolute;left:5%;top:10%;width:28%;height:28%;background:#fff;border-radius:3cqw}
+.desk{left:62%;top:50%;width:34%;height:3%;background:#8c6a4f;border-radius:1cqw}
+.desk::before,.desk::after{content:"";position:absolute;top:100%;width:4%;height:600%;background:#8c6a4f}
+.desk::before{left:8%}.desk::after{right:8%}
+.basket{left:70%;top:76%;width:22%;height:14%;background:repeating-linear-gradient(90deg,#f0a64d 0 2cqw,#e08f35 2cqw 4cqw);border-radius:1.5cqw 1.5cqw 4cqw 4cqw}
+.rug{left:34%;top:82%;width:24%;height:8%;background:#8fe0c0;border-radius:3cqw}
+.ring{position:absolute;width:14cqw;height:14cqw;transform:translate(-50%,-50%);border:.7cqw dashed rgba(35,64,90,.6);border-radius:50%;display:grid;place-items:center;font-size:7cqw;box-sizing:border-box}
+.ring span{opacity:.3}
+.ring.ok{border-style:solid;border-color:var(--mint);background:rgba(95,211,166,.3)}
+.ring.ok span{display:none}
+.item{position:absolute;width:12cqw;height:12cqw;transform:translate(-50%,-50%) rotate(var(--r));font-size:9cqw;display:grid;place-items:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;z-index:5;filter:drop-shadow(0 1cqw .8cqw rgba(0,0,0,.25))}
+.item.snap{transition:left .15s,top .15s}
+.item.drag{cursor:grabbing;transform:translate(-50%,-50%) scale(1.2);z-index:9}
+.item.done{pointer-events:none;--r:0deg;z-index:3;animation:pop .35s}
+@keyframes pop{50%{transform:translate(-50%,-50%) scale(1.35)}}
+.msg{width:var(--w);box-sizing:border-box;min-height:68px;background:var(--card);border-left:6px solid var(--sun);border-radius:14px;padding:12px 16px;font-size:16px;line-height:1.45;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.msg.fade{animation:fade .35s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+#end{position:absolute;inset:0;display:none;place-items:center;background:rgba(35,64,90,.45);z-index:20}
+#end.on{display:grid}
+.endbox{background:var(--card);border-radius:18px;padding:22px 26px;text-align:center}
+.endbox b{display:block;font-size:24px;margin-bottom:12px}
+#again{border:0;background:var(--sun);color:#23405a;font-weight:600;font-size:17px;padding:10px 22px;border-radius:999px}
+button:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Dọn phòng</h1>
+  <div class="tools"><span id="count">0/6</span><button id="mute" aria-label="Tắt âm thanh">🔊</button></div>
+</header>
+<main class="stage" id="stage">
+  <div class="win"></div><div class="sill"></div><div class="shelf"></div>
+  <div class="bed"></div><div class="desk"></div><div class="basket"></div><div class="rug"></div>
+  <div id="end"><div class="endbox"><b>Phòng gọn rồi!</b><button id="again">Chơi lại</button></div></div>
+</main>
+<div class="msg" id="msg" aria-live="polite"></div>
+<script>
+// Sửa thông điệp ở đây (mỗi món đồ một câu)
+const MESSAGES = {
+  plant: "Thông điệp mẫu số 1. Bạn sẽ thay bằng nội dung riêng sau.",
+  books: "Thông điệp mẫu số 2. Bạn sẽ thay bằng nội dung riêng sau.",
+  teddy: "Thông điệp mẫu số 3. Bạn sẽ thay bằng nội dung riêng sau.",
+  headphones: "Thông điệp mẫu số 4. Bạn sẽ thay bằng nội dung riêng sau.",
+  clothes: "Thông điệp mẫu số 5. Bạn sẽ thay bằng nội dung riêng sau.",
+  shoes: "Thông điệp mẫu số 6. Bạn sẽ thay bằng nội dung riêng sau."
+};
+const INTRO = "Kéo từng món đồ về đúng chỗ của nó.";
+const ITEMS = [
+  {id:'plant',e:'🪴',t:[76,27]},{id:'books',e:'📚',t:[22,25]},{id:'teddy',e:'🧸',t:[30,54]},
+  {id:'headphones',e:'🎧',t:[79,47]},{id:'clothes',e:'👕',t:[81,82]},{id:'shoes',e:'👟',t:[46,86]}
+];
+const SLOTS = [[52,72],[14,76],[58,42],[28,90],[88,66],[12,44]];
+const $ = s => document.querySelector(s);
+const stage=$('#stage'), msg=$('#msg'), count=$('#count'), end=$('#end');
+let done=0, muted=false, ac;
+
+function chime(){
+  if(muted) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    [660,880].forEach((f,i)=>{
+      const o=ac.createOscillator(), g=ac.createGain(), t=ac.currentTime+i*.12;
+      o.frequency.value=f; o.connect(g); g.connect(ac.destination);
+      g.gain.setValueAtTime(.15,t); g.gain.exponentialRampToValueAtTime(.001,t+.35);
+      o.start(t); o.stop(t+.4);
+    });
+  }catch(e){}
+}
+function say(t){ msg.textContent=t; msg.classList.remove('fade'); void msg.offsetWidth; msg.classList.add('fade'); }
+function place(it){
+  done++; count.textContent = done+'/'+ITEMS.length;
+  say(MESSAGES[it.id]); chime();
+  if(done===ITEMS.length) setTimeout(()=>end.classList.add('on'),900);
+}
+function attach(el,it,ring){
+  let dx=0, dy=0;
+  el.onpointerdown = e=>{
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    const b=el.getBoundingClientRect();
+    dx=e.clientX-(b.left+b.width/2); dy=e.clientY-(b.top+b.height/2);
+    el.classList.remove('snap'); el.classList.add('drag');
+  };
+  el.onpointermove = e=>{
+    if(!el.classList.contains('drag')) return;
+    const r=stage.getBoundingClientRect();
+    const x=(e.clientX-dx-r.left)/r.width*100, y=(e.clientY-dy-r.top)/r.height*100;
+    el.style.left=Math.min(96,Math.max(4,x))+'%';
+    el.style.top=Math.min(96,Math.max(4,y))+'%';
+  };
+  el.onpointercancel = ()=>el.classList.remove('drag');
+  el.onpointerup = ()=>{
+    el.classList.remove('drag');
+    const r=stage.getBoundingClientRect();
+    const x=parseFloat(el.style.left)/100*r.width, y=parseFloat(el.style.top)/100*r.height;
+    const tx=it.t[0]/100*r.width, ty=it.t[1]/100*r.height;
+    if(Math.hypot(x-tx,y-ty) < r.width*.12){
+      el.classList.add('snap','done');
+      el.style.left=it.t[0]+'%'; el.style.top=it.t[1]+'%';
+      ring.classList.add('ok'); place(it);
+    }
+  };
+}
+function build(){
+  stage.querySelectorAll('.ring,.item').forEach(n=>n.remove());
+  done=0; count.textContent='0/'+ITEMS.length; end.classList.remove('on'); say(INTRO);
+  const slots=[...SLOTS].sort(()=>Math.random()-.5);
+  ITEMS.forEach((it,i)=>{
+    const ring=document.createElement('div');
+    ring.className='ring'; ring.style.left=it.t[0]+'%'; ring.style.top=it.t[1]+'%';
+    ring.innerHTML='<span>'+it.e+'</span>'; stage.append(ring);
+    const el=document.createElement('div');
+    el.className='item'; el.textContent=it.e;
+    el.style.left=slots[i][0]+'%'; el.style.top=slots[i][1]+'%';
+    el.style.setProperty('--r',(Math.random()*50-25)+'deg');
+    stage.append(el); attach(el,it,ring);
+  });
+}
+$('#again').onclick=build;
+$('#mute').onclick=e=>{
+  muted=!muted; e.currentTarget.textContent=muted?'🔇':'🔊';
+  e.currentTarget.setAttribute('aria-label',muted?'Bật âm thanh':'Tắt âm thanh');
+};
+build();
+</script>
+</body>
+</html>
